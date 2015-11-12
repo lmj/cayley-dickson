@@ -69,10 +69,6 @@ module Math.CayleyDickson (
     Conjugable(conj),
 
     -- ** Tags
-    --
-    -- | Tags serve to determine a type's dimension, which is 2 raised
-    -- to `tagVal`. Tag instances are included for convenience only,
-    -- as you may create your own tag.
     Tag(tagVal),
     Tag0,  Tag1,  Tag2,  Tag3,  Tag4,  Tag5,  Tag6,  Tag7,  Tag8,  Tag9,
     Tag10, Tag11, Tag12, Tag13, Tag14, Tag15, Tag16, Tag17, Tag18, Tag19,
@@ -452,9 +448,16 @@ instance (Tag n, Conjugable a, RealFloat a) =>
 ----------------------------------------------------------
 -- convenience types
 
+-- | Complex numbers, the 2^1-dimensional construction.
 type Complex a = Nion Tag1 a
+
+-- | Quaternions, the 2^2-dimensional construction.
 type Quaternion a = Nion Tag2 a
+
+-- | Octonions, the 2^3-dimensional construction.
 type Octonion a = Nion Tag3 a
+
+-- | Sedenions, the 2^4-dimensional construction.
 type Sedenion a = Nion Tag4 a
 
 -- | Construct a complex number.
@@ -495,8 +498,10 @@ sedenion k l m n
 ----------------------------------------------------------
 -- Conjugable
 
+-- | The /conjugate/ of an element is obtained by negating the pure
+-- part. The conjugate for real numbers (which have no pure part) is
+-- the identity ('id').
 class Num a => Conjugable a where
-  -- | Conjugate.
   conj :: a -> a
 
 instance Conjugable a => Conjugable (Nion n a) where
@@ -545,6 +550,9 @@ doNotUse _ = error rant
 ----------------------------------------------------------
 -- Tag
 
+-- | Tags serve to determine a type's dimension, which is 2 raised to
+-- `tagVal`. Tag instances are included for convenience only, as you
+-- may create your own tag.
 class Tag n where
   tagVal :: Proxy n -> Integer
 
