@@ -499,8 +499,8 @@ sedenion k l m n
 -- Conjugable
 
 -- | The /conjugate/ of an element is obtained by negating the pure
--- part. The conjugate for real numbers (which have no pure part) is
--- the identity ('id').
+-- part and conjugating the scalar part. The conjugate of a real
+-- number (which has no pure part) is the identity ('id').
 class Num a => Conjugable a where
   conj :: a -> a
 
