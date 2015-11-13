@@ -13,6 +13,7 @@ category:            Algebra, Data, Data Structures, Math
 build-type:          Simple
 extra-source-files:  README.md
 cabal-version:       >=1.10
+homepage:            https://github.com/lmj/cayley-dickson
 
 source-repository head
   type: git
