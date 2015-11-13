@@ -226,12 +226,12 @@ rightScalarOp f x y = f x (Scalar y)
 ----------------------------------------------------------
 -- polar form and complex function application
 
-realPolar :: (Floating a, Ord a) => Nion n a -> a -> (a, a, Nion n a)
+realPolar :: RealFloat a => Nion n a -> a -> (a, a, Nion n a)
 realPolar sqrtMinus1 r
   | r >= 0 = (r, 0, sqrtMinus1)
   | otherwise = (-r, pi, sqrtMinus1)
 
-polarUsing :: (Conjugable a, Floating a, Ord a) =>
+polarUsing :: (Conjugable a, RealFloat a) =>
               Nion n a -> Nion n a -> (a, a, Nion n a)
 polarUsing sqrtMinus1 (Scalar r) = realPolar sqrtMinus1 r
 polarUsing sqrtMinus1 x
@@ -243,7 +243,7 @@ polarUsing sqrtMinus1 x
     u = purePart x /. (sqrt sqnormp)
     absx = norm x
 
-polar' :: (Tag n, Conjugable a, Floating a, Ord a) =>
+polar' :: (Tag n, Conjugable a, RealFloat a) =>
           Proxy n -> Nion n a -> (a, a, Nion n a)
 polar' n x
   | tagVal n == 0 = error "polar: no polar form in 1 dimension"
@@ -257,8 +257,7 @@ polar' n x
 --
 -- If @x@ has no pure part then @u@ is arbitrarily chosen to be the
 -- first pure basis element.
-polar :: (Tag n, Conjugable a, Floating a, Ord a) =>
-         Nion n a -> (a, a, Nion n a)
+polar :: (Tag n, Conjugable a, RealFloat a) => Nion n a -> (a, a, Nion n a)
 polar = polar' Proxy
 
 applyUsing :: (Conjugable a, RealFloat a) =>
