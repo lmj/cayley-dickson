@@ -243,6 +243,11 @@ checkMixed = do
   assert $ (quaternion 1 2 3 4 :: Quaternion (Ratio Integer)) /. 2 ==
            nion [1 % 2, 1, 3 % 2, 2] 
 
+  forM_ [-2, -1, -0.5, 0, 0.5, 1, 2] $ \r -> do
+    let (s, t, u) = polar $ (fromScalar r :: Quaternion Double)
+    assert $ s >= 0
+    assertClose (fromScalar r) $ s .* exp (t .* u)
+
 checkInverses :: IO ()
 checkInverses = do
   f $ (nion [0.1] :: Nion Tag0 Double)
