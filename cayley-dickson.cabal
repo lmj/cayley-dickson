@@ -1,5 +1,5 @@
 name:                cayley-dickson
-version:             0.1.1.0
+version:             0.1.2.0
 synopsis:            Complex numbers, quaternions, octonions, sedenions, etc.
 description:         Cayley-Dickson constructions (complex numbers, quaternions,
                      octonions, sedenions, etc.) over general scalars without
