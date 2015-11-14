@@ -260,11 +260,13 @@ polar' n x
 polar :: (Tag n, Conjugable a, RealFloat a) => Nion n a -> (a, a, Nion n a)
 polar = polar' Proxy
 
-applyUsing :: (Conjugable a, RealFloat a) =>
-              Nion n a -> (a -> a) -> (C.Complex a -> C.Complex a) ->
-              Nion n a -> Nion n a
-applyUsing _ f _ (Scalar s) = Scalar $ f s
-applyUsing sqrtMinus1 _ f z = x .+ u *. y
+applyUsing' :: (Tag n, Conjugable a, RealFloat a) =>
+               Proxy n ->
+               Nion n a -> (a -> a) -> (C.Complex a -> C.Complex a) ->
+               Nion n a -> Nion n a
+applyUsing' n sqrtMinus1 fr f z
+  | tagVal n == 0 = Scalar $ fr $ scalarPart z
+  | otherwise = x .+ u *. y
   where (s, t, u) = polarUsing sqrtMinus1 z
         -- handle special cases for a little more accuracy
         x C.:+ y | t == 0 = f s'
@@ -273,6 +275,11 @@ applyUsing sqrtMinus1 _ f z = x .+ u *. y
                  where s' = s C.:+ 0
                        t' = t C.:+ 0
                        u' = 0 C.:+ 1
+
+applyUsing :: (Tag n, Conjugable a, RealFloat a) =>
+              Nion n a -> (a -> a) -> (C.Complex a -> C.Complex a) ->
+              Nion n a -> Nion n a
+applyUsing = applyUsing' Proxy
 
 ----------------------------------------------------------
 -- constants
