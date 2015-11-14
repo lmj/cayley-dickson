@@ -9,7 +9,7 @@ license-file:        LICENSE
 author:              James M. Lawrence
 maintainer:          James M. Lawrence <llmjjmll@gmail.com>
 copyright:           Copyright (c) James M. Lawrence
-category:            Algebra, Data, Data Structures, Math
+category:            Algebra, Math
 build-type:          Simple
 extra-source-files:  README.md
 cabal-version:       >=1.10
