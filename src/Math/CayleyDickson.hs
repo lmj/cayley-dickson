@@ -333,8 +333,8 @@ sfoldr f acc (x :@ y) = sfoldr f (sfoldr f acc y) x
 -- accessors
 
 coords' :: (Tag n, Num a) => Proxy n -> Nion n a -> [a]
-coords' n' (Scalar x) = x : replicate (fromInteger $ 2^n - 1) 0 where
-                         n = tagVal n'
+coords' n (Scalar x) = x : genericReplicate k 0 where
+                         k = 2 ^ tagVal n - 1 :: Integer
 coords' _ x = sfoldr (:) [] x
 
 -- | List of coordinates for this element.
