@@ -241,7 +241,7 @@ checkMixed = do
   assert $ x *. 10 == quaternion 10 20 30 40
 
   assert $ (quaternion 1 2 3 4 :: Quaternion (Ratio Integer)) /. 2 ==
-           nion [1 % 2, 1, 3 % 2, 2] 
+           nion [1 % 2, 1, 3 % 2, 2]
 
   forM_ [-2, -1, -0.5, 0, 0.5, 1, 2] $ \r -> do
     let y = fromScalar r :: Quaternion Double

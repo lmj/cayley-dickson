@@ -236,12 +236,12 @@ polarUsing :: (Conjugable a, RealFloat a) =>
 polarUsing sqrtMinus1 (Scalar r) = realPolar sqrtMinus1 r
 polarUsing sqrtMinus1 x
   | sqnormp == 0 = realPolar sqrtMinus1 r
-  | otherwise = (absx, acos (r / absx), u)
+  | otherwise = (normx, acos (r / normx), u)
   where
     r = scalarPart x
     sqnormp = sqnorm x - r*r
-    u = purePart x /. (sqrt sqnormp)
-    absx = norm x
+    u = purePart x /. sqrt sqnormp
+    normx = norm x
 
 polar' :: (Tag n, Conjugable a, RealFloat a) =>
           Proxy n -> Nion n a -> (a, a, Nion n a)
