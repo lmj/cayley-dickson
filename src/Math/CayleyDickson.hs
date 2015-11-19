@@ -313,12 +313,29 @@ basisElement1 :: (Tag n, Conjugable a) => Nion n a
 basisElement1 = basisElement (1 :: Integer)
 
 ----------------------------------------------------------
+-- util
+
+-- Proper Functor and Foldable instances would have to translate
+-- top-level scalars to their equivalent representation with padded
+-- zeros. The machinations needed for this indirection are rather
+-- cumbersome relative to the benefits of having the instances, whose
+-- use would seem uncommon.
+
+smap :: (a -> a) -> Nion n a -> Nion n a
+smap f (Scalar s) = Scalar $ f s
+smap f (x :@ y) = smap f x :@ smap f y
+
+sfoldr :: (a -> b -> b) -> b -> Nion n a -> b
+sfoldr f acc (Scalar x) = f x acc
+sfoldr f acc (x :@ y) = sfoldr f (sfoldr f acc y) x
+
+----------------------------------------------------------
 -- accessors
 
 coords' :: (Tag n, Num a) => Proxy n -> Nion n a -> [a]
 coords' n' (Scalar x) = x : replicate (fromInteger $ 2^n - 1) 0 where
                          n = tagVal n'
-coords' _ x = foldr (:) [] x
+coords' _ x = sfoldr (:) [] x
 
 -- | List of coordinates for this element.
 coords :: (Tag n, Num a) => Nion n a -> [a]
@@ -390,26 +407,6 @@ instance (Conjugable a, Eq a) => Eq (Nion n a) where
   x1 :@ x2 == y@(Scalar _) = x1 == y && x2 == 0
   x1 :@ x2 == y1 :@ y2 = x1 == y1 && x2 == y2
 
-instance Functor (Nion n) where
-  fmap f (Scalar s) = Scalar $ f s
-  fmap f (x :@ y) = fmap f x :@ fmap f y
-
-instance Tag n => Applicative (Nion n) where
-  pure = fill
-
-  Scalar f <*> Scalar x = Scalar $ f x
-  Scalar f <*> x@(_ :@ _) = pure f <*> x
-  f@(_ :@ _) <*> (Scalar x) = f <*> pure x
-  (f1 :@ f2) <*> (x1 :@ x2) = (f1 <*> x1) :@ (f2 <*> x2)
-
-instance Foldable (Nion n) where
-  foldr f acc (Scalar x) = f x acc
-  foldr f acc (x :@ y) = foldr f (foldr f acc y) x
-
-instance Traversable (Nion n) where
-  traverse f (Scalar x) = Scalar <$> (f x)
-  traverse f (x :@ y) = (:@) <$> traverse f x <*> traverse f y
-
 instance Conjugable a => Num (Nion n a) where
   Scalar x + Scalar y = Scalar $ x + y
   x@(Scalar _) + (y1 :@ y2) = (x + y1) :@ y2
@@ -426,7 +423,7 @@ instance Conjugable a => Num (Nion n a) where
   (x1 :@ x2) * y@(Scalar _) = (x1 * y) :@ (x2 * y)
   (x1 :@ x2) * (y1 :@ y2) = (x1 * y1 - conj y2 * x2) :@ (y2 * x1 + x2 * conj y1)
 
-  negate = fmap negate
+  negate = smap negate
   fromInteger = fromScalar . fromInteger
   abs = doNotUse
   signum = doNotUse
@@ -434,7 +431,7 @@ instance Conjugable a => Num (Nion n a) where
 instance (Conjugable a, Fractional a) => Fractional (Nion n a) where
   Scalar x / Scalar y = Scalar $ x / y
   x@(Scalar _) / y@(_ :@ _) = x * recip y
-  x@(_ :@ _) / Scalar y = fmap (/ y) x
+  x@(_ :@ _) / Scalar y = smap (/ y) x
   x@(_ :@ _) / y@(_ :@ _) = (x * conj y) /. sqnorm y
 
   recip x = conj x /. sqnorm x

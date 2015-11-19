@@ -297,18 +297,6 @@ checkBasic = do
   assert $ recip y == quaternion (1 % 30) (-1 % 15) (-1 % 10) (-2 % 15)
   assert $ y * recip y == 1
 
-checkApplicative :: IO ()
-checkApplicative = do
-  let x = quaternion 1 2 3 4 :: Quaternion Integer
-      y = quaternion 5 6 7 8 :: Quaternion Integer
-      r = nion [3] :: Nion Tag0 Integer
-      s = nion [4] :: Nion Tag0 Integer
-  assert $ ((+) <$> x <*> y) == x + y
-  assert $ ((-) <$> x <*> y) == x - y
-  assert $ ((*) <$> 3 <*> x) == 3 * x
-  assert $ ((*) <$> x <*> 3) == x * 3
-  assert $ ((*) <$> r <*> s) == r * s
-
 checkPower :: IO ()
 checkPower = do
   let x = quaternion 1 2 3 4 :: Quaternion Integer
@@ -416,7 +404,6 @@ main = do
   checkOctonion
   checkSedenion
   checkBig
-  checkApplicative
   checkPower
   checkInverses
   checkMixed
