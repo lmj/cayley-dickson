@@ -7,7 +7,7 @@ import System.Random (Random, randomRIO)
 ----------------------------------------------------------
 -- alternate formulas
 
-pureDir :: (Tag n, Conjugable a, Floating a) => Nion n a -> Nion n a
+pureDir :: (Conjugable a, Floating a) => Nion n a -> Nion n a
 pureDir x = p /. (norm p) where p = purePart x
 
 cos' :: (Tag n, Conjugable a, RealFloat a) => Nion n a -> Nion n a
@@ -22,11 +22,10 @@ cosh' x = (exp x + exp (- x)) / 2
 sinh' :: (Tag n, Conjugable a, RealFloat a) => Nion n a -> Nion n a
 sinh' x = (exp x - exp (- x)) / 2
 
-dot' :: (Tag n, Conjugable a, Fractional a) => Nion n a -> Nion n a -> a
+dot' :: (Conjugable a, Fractional a) => Nion n a -> Nion n a -> a
 dot' x y = scalarPart $ (y * conj x + x * conj y) / 2
 
-cross' :: (Tag n, Conjugable a, Fractional a) =>
-          Nion n a -> Nion n a -> Nion n a
+cross' :: (Conjugable a, Fractional a) => Nion n a -> Nion n a -> Nion n a
 cross' x y = (y * conj x - x * conj y) / 2
 
 qmul :: Num a => a -> a -> a -> a ->
@@ -46,13 +45,13 @@ assert :: Bool -> IO ()
 assert True = putChar '.'
 assert False = error "assertion failed"
 
-close :: Tag n => Nion n Double -> Nion n Double -> Bool
+close :: Nion n Double -> Nion n Double -> Bool
 close x y = norm (x - y) < epsilon
 
 closeReal :: Double -> Double -> Bool
 closeReal x y = abs (x - y) < epsilon
 
-assertClose :: Tag n => Nion n Double -> Nion n Double -> IO ()
+assertClose :: Nion n Double -> Nion n Double -> IO ()
 assertClose x y = assert $ close x y
 
 assertCloseReal :: Double -> Double -> IO ()
@@ -79,13 +78,7 @@ randomEltI :: Tag n => IO (Nion n Integer)
 randomEltI = randomElt boundsI
 
 randomEltI' :: (Tag n1, Tag n2) => Integer -> IO (Nion n1 (Nion n2 Integer))
-randomEltI' n = liftM nion $ replicateM (fromIntegral n) randomEltI
-
-randomEltI2 :: Tag n => IO (Complex (Nion n Integer))
-randomEltI2 = randomEltI' 2
-
-randomEltI4 :: Tag n => IO (Quaternion (Nion n Integer))
-randomEltI4 = randomEltI' 4
+randomEltI' n = liftM nion $ replicateM (2^n) $ randomEltI
 
 ----------------------------------------------------------
 -- checks
@@ -117,17 +110,14 @@ checkFloating1' n' x = do
 checkFloating1 :: Tag n => Nion n Double -> IO ()
 checkFloating1 = checkFloating1' Proxy
 
-checkFloating2' :: Tag n => Proxy n -> Nion n Double -> Nion n Double -> IO ()
-checkFloating2' _ x y = do
+checkFloating2 :: Nion n Double -> Nion n Double -> IO ()
+checkFloating2 x y = do
   assertCloseReal (x `dot` y) (x `dot'` y)
   assertCloseReal (5 `dot` y) (5 `dot'` y)
   assertCloseReal (x `dot` 5) (x `dot'` 5)
   assertClose (x `cross` y) (x `cross'` y)
   assertClose (5 `cross` y) (5 `cross'` y)
   assertClose (x `cross` 5) (x `cross'` 5)
-
-checkFloating2 :: Tag n => Nion n Double -> Nion n Double -> IO ()
-checkFloating2 = checkFloating2' Proxy
 
 checkFloating3 :: Tag n => Nion n Double -> IO ()
 checkFloating3 x' = do
@@ -315,12 +305,12 @@ checkPower = do
   assert $ y ^^. (-1 :: Integer) == recip y
   assert $ y ^^. (-2 :: Integer) == recip (y * y)
 
-checkZeroAndOne :: (Show a, Eq a, Conjugable a) => Nion n1 (Nion n2 a) -> IO ()
+checkZeroAndOne :: (Conjugable a, Eq a) => Nion n1 (Nion n2 a) -> IO ()
 checkZeroAndOne x = do
   assert $ 0 + x == x
   assert $ 1 * x == x
 
-checkDistributive :: (Show a, Eq a, Conjugable a) =>
+checkDistributive :: (Conjugable a, Eq a) =>
                      Nion n1 (Nion n2 a) -> Nion n1 (Nion n2 a) ->
                      Nion n2 a -> Nion n2 a ->
                      IO ()
@@ -328,7 +318,7 @@ checkDistributive x y r s = do
   assert $ (r + s) .* x == r .* x + s .* x
   assert $ r .* (x + y) == r .* x + r .* y
 
-checkModule :: (Show a, Eq a, Conjugable a) =>
+checkModule :: (Conjugable a, Eq a) =>
                Nion n1 (Nion n2 a) -> Nion n1 (Nion n2 a) ->
                Nion n2 a -> Nion n2 a -> IO ()
 checkModule x y r s = do
@@ -359,8 +349,8 @@ checkProperties1 = do
   let f = phi :: Complex (Complex Integer) -> Quaternion Integer
   r <- randomEltI :: IO (Complex Integer)
   s <- randomEltI :: IO (Complex Integer)
-  x <- randomEltI2 :: IO (Complex (Complex Integer))
-  y <- randomEltI2 :: IO (Complex (Complex Integer))
+  x <- randomEltI' 1 :: IO (Complex (Complex Integer))
+  y <- randomEltI' 1 :: IO (Complex (Complex Integer))
   checkIsomorphism f x y
   checkModule x y r s
 
@@ -369,8 +359,8 @@ checkProperties2 = do
   let f = phi :: Complex (Quaternion Integer) -> Octonion Integer
   r <- randomEltI :: IO (Quaternion Integer)
   s <- randomEltI :: IO (Quaternion Integer)
-  x <- randomEltI2 :: IO (Complex (Quaternion Integer))
-  y <- randomEltI2 :: IO (Complex (Quaternion Integer))
+  x <- randomEltI' 1 :: IO (Complex (Quaternion Integer))
+  y <- randomEltI' 1 :: IO (Complex (Quaternion Integer))
   checkIsomorphism f x y
   checkModule x y r s
 
@@ -379,8 +369,8 @@ checkProperties3 = do
   let f = phi :: Complex (Octonion Integer) -> Sedenion Integer
   r <- randomEltI :: IO (Octonion Integer)
   s <- randomEltI :: IO (Octonion Integer)
-  x <- randomEltI2 :: IO (Complex (Octonion Integer))
-  y <- randomEltI2 :: IO (Complex (Octonion Integer))
+  x <- randomEltI' 1 :: IO (Complex (Octonion Integer))
+  y <- randomEltI' 1 :: IO (Complex (Octonion Integer))
   checkIsomorphism f x y
   checkDistributive x y r s
   checkZeroAndOne x
@@ -390,8 +380,8 @@ checkProperties4 = do
   let f = phi :: Quaternion (Complex Integer) -> Octonion Integer
   r <- randomEltI :: IO (Complex Integer)
   s <- randomEltI :: IO (Complex Integer)
-  x <- randomEltI4 :: IO (Quaternion (Complex Integer))
-  y <- randomEltI4 :: IO (Quaternion (Complex Integer))
+  x <- randomEltI' 2 :: IO (Quaternion (Complex Integer))
+  y <- randomEltI' 2 :: IO (Quaternion (Complex Integer))
   checkIsomorphism f x y
   checkModule x y r s
 

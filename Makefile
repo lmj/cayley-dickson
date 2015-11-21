@@ -8,7 +8,7 @@ Setup:
 dist: Setup
 	./Setup configure --enable-tests
 
-sdist: Setup dist
+sdist: dist
 	./Setup sdist
 
 doc: dist
