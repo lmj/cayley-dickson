@@ -431,9 +431,8 @@ instance Conjugable a => Num (Nion n a) where
 
 instance (Conjugable a, Fractional a) => Fractional (Nion n a) where
   Scalar x / Scalar y = Scalar $ x / y
-  x@(Scalar _) / y@(_ :@ _) = x * recip y
   x@(_ :@ _) / Scalar y = smap (/ y) x
-  x@(_ :@ _) / y@(_ :@ _) = (x * conj y) /. sqnorm y
+  x / y = (x * conj y) /. sqnorm y
 
   recip x = conj x /. sqnorm x
   fromRational = fromScalar . fromRational

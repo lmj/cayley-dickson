@@ -288,6 +288,7 @@ checkBasic = do
   let y = quaternion 1 2 3 4 :: Quaternion (Ratio Integer)
   assert $ y / 2 == quaternion (1 % 2) 1 (3 % 2) 2
   assert $ recip y == quaternion (1 % 30) (-1 % 15) (-1 % 10) (-2 % 15)
+  assert $ 3 / y == quaternion (1 % 10) (-1 % 5) (-3 % 10) (-2 % 5)
   assert $ y * recip y == 1
 
 checkPower :: IO ()
