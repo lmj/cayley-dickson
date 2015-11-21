@@ -1,4 +1,4 @@
-.PHONY: doc showdoc test clean
+.PHONY: doc showdoc build test showtest clean
 
 default: test
 
@@ -17,9 +17,14 @@ doc: dist
 showdoc: doc
 	$(BROWSER) dist/doc/html/cayley-dickson/Math-CayleyDickson.html
 
-test: dist
+build: dist
 	./Setup build
+
+test: build
 	./Setup test
+
+showtest: build
+	./dist/build/test/test
 
 clean:
 	git clean -fdx
