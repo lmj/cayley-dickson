@@ -15,7 +15,7 @@ doc: dist
 	./Setup haddock
 
 showdoc: doc
-	firefox dist/doc/html/cayley-dickson/Math-CayleyDickson.html
+	$(BROWSER) dist/doc/html/cayley-dickson/Math-CayleyDickson.html
 
 test: dist
 	./Setup build
