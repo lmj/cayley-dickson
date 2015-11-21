@@ -118,9 +118,11 @@ checkFloating2 x y = do
   assertCloseReal (x `dot` y) (x `dot'` y)
   assertCloseReal (5 `dot` y) (5 `dot'` y)
   assertCloseReal (x `dot` 5) (x `dot'` 5)
+  assertCloseReal (3 `dot` 5) (3 `dot'` 5)
   assertClose (x `cross` y) (x `cross'` y)
   assertClose (5 `cross` y) (5 `cross'` y)
   assertClose (x `cross` 5) (x `cross'` 5)
+  assertClose (3 `cross` 5) (3 `cross'` 5)
 
 checkFloating3 :: Tag n => Nion n Double -> IO ()
 checkFloating3 x' = do
@@ -330,7 +332,18 @@ checkModule x y r s = do
   checkZeroAndOne x
   assert $ (r * s) .* x == r .* (s .* x)
 
-checkIsomorphism :: (Conjugable a, Show a, Eq a) =>
+checkDotCross :: (Conjugable a, Eq a) =>
+                 Nion n1 (Nion n2 a) -> Nion n1 (Nion n2 a) -> IO ()
+checkDotCross x' y' = do
+  let x = purePart x'
+      y = purePart y'
+      x_cross_y = x `cross` y
+  assert $ 2 * fromScalar (x `dot` y) == y * conj x + x * conj y
+  assert $ 2 * x_cross_y == y * conj x - x * conj y
+  assert $ x `dot` x_cross_y == 0
+  assert $ y `dot` x_cross_y == 0
+
+checkIsomorphism :: (Conjugable a, Eq a) =>
                     ((Nion n1 (Nion n2 a)) -> Nion n3 a) ->
                     (Nion n1 (Nion n2 a)) -> (Nion n1 (Nion n2 a)) ->
                     IO ()
@@ -343,6 +356,8 @@ checkIsomorphism f x y = do
   assert $ f (x - y) == f x - f y
   assert $ f (x * y) == f x * f y
   assert $ scalarPart (sqnorm x) == sqnorm (f x)
+  assert $ scalarPart (x `dot` y) == f x `dot` f y
+  assert $ f (x `cross` y) == f x `cross` f y
 
 phi :: (Tag n1, Tag n2, Tag n3, Conjugable a) =>
        (Nion n1 (Nion n2 a)) -> Nion n3 a
@@ -357,6 +372,7 @@ checkProperties1 = do
   y <- randomEltI' 1 :: IO (Complex (Complex Integer))
   checkIsomorphism f x y
   checkModule x y r s
+  checkDotCross x y
 
 checkProperties2 :: IO ()
 checkProperties2 = do
@@ -367,6 +383,7 @@ checkProperties2 = do
   y <- randomEltI' 1 :: IO (Complex (Quaternion Integer))
   checkIsomorphism f x y
   checkModule x y r s
+  checkDotCross x y
 
 checkProperties3 :: IO ()
 checkProperties3 = do
@@ -378,6 +395,7 @@ checkProperties3 = do
   checkIsomorphism f x y
   checkDistributive x y r s
   checkZeroAndOne x
+  checkDotCross x y
 
 checkProperties4 :: IO ()
 checkProperties4 = do
@@ -388,6 +406,31 @@ checkProperties4 = do
   y <- randomEltI' 2 :: IO (Quaternion (Complex Integer))
   checkIsomorphism f x y
   checkModule x y r s
+  checkDotCross x y
+
+checkProperties5 :: IO ()
+checkProperties5 = do
+  let f = phi :: Octonion (Sedenion Integer) -> Nion Tag7 Integer
+  r <- randomEltI :: IO (Sedenion Integer)
+  s <- randomEltI :: IO (Sedenion Integer)
+  x <- randomEltI' 3 :: IO (Octonion (Sedenion Integer))
+  y <- randomEltI' 3 :: IO (Octonion (Sedenion Integer))
+  checkIsomorphism f x y
+  checkZeroAndOne x
+  checkDistributive x y r s
+  checkDotCross x y
+
+checkProperties6 :: IO ()
+checkProperties6 = do
+  let f = phi :: Sedenion (Nion Tag5 Integer) -> Nion Tag9 Integer
+  r <- randomEltI :: IO (Nion Tag5 Integer)
+  s <- randomEltI :: IO (Nion Tag5 Integer)
+  x <- randomEltI' 4 :: IO (Sedenion (Nion Tag5 Integer))
+  y <- randomEltI' 4 :: IO (Sedenion (Nion Tag5 Integer))
+  checkIsomorphism f x y
+  checkZeroAndOne x
+  checkDistributive x y r s
+  checkDotCross x y
 
 main :: IO ()
 main = do
@@ -407,4 +450,6 @@ main = do
     checkProperties2
     checkProperties3
     checkProperties4
+  checkProperties5
+  checkProperties6
   putStrLn "\nAll tests passed."

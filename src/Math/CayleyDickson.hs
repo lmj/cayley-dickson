@@ -66,7 +66,7 @@ module Math.CayleyDickson (
     basisElement,
 
     -- * Classes
-    Conjugable(conj),
+    Conjugable(..),
 
     -- ** Tags
     Tag(tagVal),
@@ -129,16 +129,19 @@ purePart :: Num a => Nion n a -> Nion n a
 purePart (Scalar _) = Scalar 0
 purePart (x :@ y) = purePart x :@ y
 
--- | Dot product (actually the Hermitian inner product, a
--- generalization of the dot product).
+-- | Dot product. @(1 \`dot\`)@ is equivalent to @'scalarPart'@.
 dot :: Conjugable a => Nion n a -> Nion n a -> a
-Scalar x `dot` Scalar y = conj x * y -- also defined as x * conj y
+-- (y * conj x + x * conj y) / 2
+Scalar x `dot` Scalar y = scalarPart' $ y * conj x
 x@(Scalar _) `dot` (y1 :@ _) = x `dot` y1
 (x1 :@ _) `dot` y@(Scalar _) = x1 `dot` y
 (x1 :@ x2) `dot` (y1 :@ y2) = (x1 `dot` y1) + (x2 `dot` y2)
 
--- | Cross product.
+-- | Cross product. @(1 \`cross\`)@ is equivalent to @'purePart'@. The
+-- cross product of two pures yields an element that is orthogonal to
+-- both operands.
 cross :: Conjugable a => Nion n a -> Nion n a -> Nion n a
+-- (y * conj x - x * conj y) / 2
 x `cross` y = y * conj x -. x `dot` y
 
 -- | Squared norm: the dot product of an element with itself.
@@ -512,31 +515,41 @@ sedenion k l m n
 
 -- | The /conjugate/ of an element is obtained by negating the pure
 -- part and conjugating the scalar part. The conjugate of a real
--- number (which has no pure part) is the identity ('id').
+-- number is the identity ('id'), which is the default implementation.
 class Num a => Conjugable a where
+  -- | Conjugate.
   conj :: a -> a
+  conj = id
+
+  -- | Equivalent to @(x + conj x) / 2@.
+  scalarPart' :: a -> a
+  scalarPart' = id
 
 instance Conjugable a => Conjugable (Nion n a) where
   conj (Scalar x) = Scalar $ conj x
   conj (x :@ y) = conj x :@ negate y
 
-instance RealFloat a => Conjugable (C.Complex a) where
-  conj = C.conjugate
+  scalarPart' (Scalar x) = Scalar $ scalarPart' x
+  scalarPart' (x :@ _) = scalarPart' x
 
-instance Conjugable Int where conj = id
-instance Conjugable Integer where conj = id
-instance Conjugable Float where conj = id
-instance Conjugable Double where conj = id
-instance Conjugable Z.Int8 where conj = id
-instance Conjugable Z.Int16 where conj = id
-instance Conjugable Z.Int32 where conj = id
-instance Conjugable Z.Int64 where conj = id
-instance Conjugable W.Word8 where conj = id
-instance Conjugable W.Word16 where conj = id
-instance Conjugable W.Word32 where conj = id
-instance Conjugable W.Word64 where conj = id
-instance Integral a => Conjugable (Q.Ratio a) where conj = id
-instance F.HasResolution a => Conjugable (F.Fixed a) where conj = id
+instance (Conjugable a, RealFloat a) => Conjugable (C.Complex a) where
+  conj = C.conjugate
+  scalarPart' (x C.:+ _) = scalarPart' x C.:+ 0
+
+instance Conjugable Int
+instance Conjugable Integer
+instance Conjugable Float
+instance Conjugable Double
+instance Conjugable Z.Int8
+instance Conjugable Z.Int16
+instance Conjugable Z.Int32
+instance Conjugable Z.Int64
+instance Conjugable W.Word8
+instance Conjugable W.Word16
+instance Conjugable W.Word32
+instance Conjugable W.Word64
+instance Integral a => Conjugable (Q.Ratio a)
+instance F.HasResolution a => Conjugable (F.Fixed a)
 
 -----------------------------------------------------------------------------
 -- doNotUse
