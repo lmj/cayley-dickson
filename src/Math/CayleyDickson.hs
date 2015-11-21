@@ -343,9 +343,10 @@ coords = coords' Proxy
 
 coord' :: (Tag n, Num a, Integral b, Bits b) => Proxy n -> Nion n a -> b -> a
 coord' _ (Scalar x) 0 = x
-coord' _ (Scalar _) _ = 0
 coord' n elt index
-  | validIndex n index = f elt $ fromInteger $ tagVal n - 1
+  | validIndex n index = case elt of
+                           Scalar _ -> 0
+                           _ -> f elt $ fromInteger $ tagVal n - 1
   | otherwise = error "coord: out of range"
   where
     f (Scalar x) _ = x
