@@ -3,6 +3,7 @@ import Data.Proxy (Proxy(Proxy))
 import Data.Ratio (Ratio, (%))
 import Control.Monad (replicateM, replicateM_, forM_, liftM)
 import System.Random (Random, randomRIO)
+import System.IO (hFlush, stdout)
 
 ----------------------------------------------------------
 -- alternate formulas
@@ -42,7 +43,9 @@ epsilon :: Double
 epsilon = 1e-7
 
 assert :: Bool -> IO ()
-assert True = putChar '.'
+assert True = do
+  putChar '.'
+  hFlush stdout
 assert False = error "assertion failed"
 
 close :: Nion n Double -> Nion n Double -> Bool
