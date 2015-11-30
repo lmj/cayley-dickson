@@ -361,19 +361,23 @@ coord' n elt index
 coord :: (Tag n, Num a, Integral b, Bits b) => Nion n a -> b -> a
 coord = coord' Proxy
 
-setCoord' :: (Tag n, Conjugable a, Num b, Bits b) =>
+setCoord' :: (Tag n, Conjugable a, Integral b, Bits b) =>
              Proxy n -> Nion n a -> b -> a -> Nion n a
 setCoord' _ (Scalar _) 0 value = Scalar value
-setCoord' _ (Scalar x) index value = setCoord (x .+ paddedZero) index value
-setCoord' n elt index value = f elt $ fromInteger $ tagVal n - 1 where
-  f (Scalar _) _ = Scalar value
-  f (x :@ y) k = case testBit index k of
-                   False -> f x k' :@ y
-                   True  -> x :@ f y k'
-                 where k' = k - 1
+setCoord' n elt index value
+  | validIndex n index = case elt of
+                           Scalar x -> setCoord (x .+ paddedZero) index value
+                           _ -> f elt $ fromInteger $ tagVal n - 1
+  | otherwise = error "setCoord: out of range"
+  where
+    f (Scalar _) _ = Scalar value
+    f (x :@ y) k = case testBit index k of
+                     False -> f x k' :@ y
+                     True  -> x :@ f y k'
+                   where k' = k - 1
 
 -- | Set the nth coordinate, returning a new element.
-setCoord :: (Tag n, Conjugable a, Num b, Bits b) =>
+setCoord :: (Tag n, Conjugable a, Integral b, Bits b) =>
             Nion n a -> b -> a -> Nion n a
 setCoord = setCoord' Proxy
 
