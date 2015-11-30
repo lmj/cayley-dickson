@@ -299,20 +299,20 @@ checkBasic = do
 checkPower :: IO ()
 checkPower = do
   let x = quaternion 1 2 3 4 :: Quaternion Integer
-  assert $ x ^. (0 :: Integer) == 1
-  assert $ x ^. (1 :: Integer) == x
-  assert $ x ^. (2 :: Integer) == x * x
-  assert $ x ^. (3 :: Integer) == x * x * x
-  assert $ x ^. (4 :: Integer) == x * x * x * x
+  assert $ x ^ (0 :: Integer) == 1
+  assert $ x ^ (1 :: Integer) == x
+  assert $ x ^ (2 :: Integer) == x * x
+  assert $ x ^ (3 :: Integer) == x * x * x
+  assert $ x ^ (4 :: Integer) == x * x * x * x
 
   let y = quaternion 1 2 3 4 :: Quaternion (Ratio Integer)
-  assert $ y ^^. (0 :: Integer) == 1
-  assert $ y ^^. (1 :: Integer) == y
-  assert $ y ^^. (2 :: Integer) == y * y
-  assert $ y ^^. (3 :: Integer) == y * y * y
-  assert $ y ^^. (4 :: Integer) == y * y * y * y
-  assert $ y ^^. (-1 :: Integer) == recip y
-  assert $ y ^^. (-2 :: Integer) == recip (y * y)
+  assert $ y ^^ (0 :: Integer) == 1
+  assert $ y ^^ (1 :: Integer) == y
+  assert $ y ^^ (2 :: Integer) == y * y
+  assert $ y ^^ (3 :: Integer) == y * y * y
+  assert $ y ^^ (4 :: Integer) == y * y * y * y
+  assert $ y ^^ (-1 :: Integer) == recip y
+  assert $ y ^^ (-2 :: Integer) == recip (y * y)
 
 checkZeroAndOne :: (Conjugable a, Eq a) => Nion n1 (Nion n2 a) -> IO ()
 checkZeroAndOne x = do

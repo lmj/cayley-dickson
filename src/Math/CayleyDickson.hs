@@ -56,7 +56,7 @@ module Math.CayleyDickson (
     --
     -- | The mnemonic is that the period (".") is on the side of the
     -- scalar.
-    (^.), (^^.), (**.),
+    (**.),
     (.+), (+.), (.-), (-.), (.*), (*.), (/.),
 
     -- * Accessors
@@ -103,8 +103,6 @@ infix 7 .*
 infix 7 *.
 infix 7 /.
 
-infixr 8 ^.
-infixr 8 ^^.
 infixr 8 **.
 
 ----------------------------------------------------------
@@ -159,37 +157,6 @@ fromScalar :: a -> Nion n a
 fromScalar = Scalar
 
 ----------------------------------------------------------
--- power operations
-
--- | Raise to a non-negative integral power.
-(^.) :: (Conjugable a, Integral b) => Nion n a -> b -> Nion n a
-Scalar x ^. y = Scalar $ x ^ y
--- Copied from GHC's (^) with modifications. (c) The University of
--- Glasgow, 1994-2002.
-x0 ^. y0 | y0 < 0    = error "(^.): negative exponent"
-         | y0 == 0   = Scalar 1
-         | otherwise = f x0 y0
-         where -- f : x0 ^ y0 = x ^ y
-           f x y | even y    = f (x * x) (y `quot` 2)
-                 | y == 1    = x
-                 | otherwise = g (x * x) ((y - 1) `quot` 2) x
-           -- g : x0 ^ y0 = (x ^ y) * z
-           g x y z | even y = g (x * x) (y `quot` 2) z
-                   | y == 1 = x * z
-                   | otherwise = g (x * x) ((y - 1) `quot` 2) (x * z)
-
--- | Raise to an integral power.
-(^^.) :: (Conjugable a, Fractional a, Integral b) => Nion n a -> b -> Nion n a
-Scalar x ^^. n = Scalar $ x ^^ n
-x ^^. n | n >= 0 = x ^. n
-        | otherwise = recip $ x ^. negate n
-
--- | Raise to a scalar power.
-(**.) :: (Tag n, Conjugable a, RealFloat a) => Nion n a -> a -> Nion n a
-Scalar x **. y = Scalar $ x ** y
-x **. y = exp (Scalar y * log x)
-
-----------------------------------------------------------
 -- operations with scalars
 
 leftScalarOp :: (Nion n a -> Nion n a -> Nion n a) -> a -> Nion n a -> Nion n a
@@ -225,6 +192,11 @@ rightScalarOp f x y = f x (Scalar y)
 -- | Equivalent to @x / 'fromScalar' y@.
 (/.) :: (Conjugable a, Fractional a) => Nion n a -> a -> Nion n a
 (/.) = rightScalarOp (/)
+
+-- | Raise to a scalar power.
+(**.) :: (Tag n, Conjugable a, RealFloat a) => Nion n a -> a -> Nion n a
+Scalar x **. y = Scalar $ x ** y
+x **. y = exp (y .* log x)
 
 ----------------------------------------------------------
 -- polar form and complex function application
