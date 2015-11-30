@@ -241,10 +241,11 @@ polarUsing sqrtMinus1 x
   | sqnormp == 0 = realPolar sqrtMinus1 r
   | otherwise = (normx, acos (r / normx), u)
   where
+    p = purePart x
+    sqnormp = sqnorm p
+    u = p /. sqrt sqnormp
     r = scalarPart x
-    sqnormp = sqnorm x - r*r
-    u = purePart x /. sqrt sqnormp
-    normx = norm x
+    normx = sqrt $ sqnormp + r * conj r
 
 polar' :: (Tag n, Conjugable a, RealFloat a) =>
           Proxy n -> Nion n a -> (a, a, Nion n a)
