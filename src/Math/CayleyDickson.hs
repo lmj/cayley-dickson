@@ -127,7 +127,8 @@ purePart :: Num a => Nion n a -> Nion n a
 purePart (Scalar _) = Scalar 0
 purePart (x :@ y) = purePart x :@ y
 
--- | Dot product. @(1 \`dot\`)@ is equivalent to @'scalarPart'@.
+-- | Dot product. For real scalars, @(1 \`dot\`)@ is equivalent to
+-- @'scalarPart'@.
 dot :: Conjugable a => Nion n a -> Nion n a -> a
 -- (y * conj x + x * conj y) / 2
 Scalar x `dot` Scalar y = scalarPart' $ y * conj x
@@ -135,9 +136,9 @@ x@(Scalar _) `dot` (y1 :@ _) = x `dot` y1
 (x1 :@ _) `dot` y@(Scalar _) = x1 `dot` y
 (x1 :@ x2) `dot` (y1 :@ y2) = (x1 `dot` y1) + (x2 `dot` y2)
 
--- | Cross product. @(1 \`cross\`)@ is equivalent to @'purePart'@. The
--- cross product of two pures yields an element that is orthogonal to
--- both operands.
+-- | Cross product. The cross product of two pures yields a pure that
+-- is orthogonal to both operands. For real scalars, @(1 \`cross\`)@
+-- is equivalent to @'purePart'@.
 cross :: Conjugable a => Nion n a -> Nion n a -> Nion n a
 -- (y * conj x - x * conj y) / 2
 x `cross` y = y * conj x -. x `dot` y
