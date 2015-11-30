@@ -80,8 +80,11 @@ randomEltD = randomElt boundsD
 randomEltI :: Tag n => IO (Nion n Integer)
 randomEltI = randomElt boundsI
 
-randomEltI' :: (Tag n1, Tag n2) => Integer -> IO (Nion n1 (Nion n2 Integer))
-randomEltI' n = liftM nion $ replicateM (2^n) $ randomEltI
+randomEltI'' :: (Tag n1, Tag n2) => Proxy n1 -> IO (Nion n1 (Nion n2 Integer))
+randomEltI'' n = liftM nion $ replicateM (2 ^ tagVal n) $ randomEltI
+
+randomEltI' :: (Tag n1, Tag n2) => IO (Nion n1 (Nion n2 Integer))
+randomEltI' = randomEltI'' Proxy
 
 ----------------------------------------------------------
 -- checks
@@ -368,8 +371,8 @@ checkProperties1 = do
   let f = phi :: Complex (Complex Integer) -> Quaternion Integer
   r <- randomEltI :: IO (Complex Integer)
   s <- randomEltI :: IO (Complex Integer)
-  x <- randomEltI' 1 :: IO (Complex (Complex Integer))
-  y <- randomEltI' 1 :: IO (Complex (Complex Integer))
+  x <- randomEltI' :: IO (Complex (Complex Integer))
+  y <- randomEltI' :: IO (Complex (Complex Integer))
   checkIsomorphism f x y
   checkModule x y r s
   checkDotCross x y
@@ -379,8 +382,8 @@ checkProperties2 = do
   let f = phi :: Complex (Quaternion Integer) -> Octonion Integer
   r <- randomEltI :: IO (Quaternion Integer)
   s <- randomEltI :: IO (Quaternion Integer)
-  x <- randomEltI' 1 :: IO (Complex (Quaternion Integer))
-  y <- randomEltI' 1 :: IO (Complex (Quaternion Integer))
+  x <- randomEltI' :: IO (Complex (Quaternion Integer))
+  y <- randomEltI' :: IO (Complex (Quaternion Integer))
   checkIsomorphism f x y
   checkModule x y r s
   checkDotCross x y
@@ -390,8 +393,8 @@ checkProperties3 = do
   let f = phi :: Complex (Octonion Integer) -> Sedenion Integer
   r <- randomEltI :: IO (Octonion Integer)
   s <- randomEltI :: IO (Octonion Integer)
-  x <- randomEltI' 1 :: IO (Complex (Octonion Integer))
-  y <- randomEltI' 1 :: IO (Complex (Octonion Integer))
+  x <- randomEltI' :: IO (Complex (Octonion Integer))
+  y <- randomEltI' :: IO (Complex (Octonion Integer))
   checkIsomorphism f x y
   checkDistributive x y r s
   checkZeroAndOne x
@@ -402,8 +405,8 @@ checkProperties4 = do
   let f = phi :: Quaternion (Complex Integer) -> Octonion Integer
   r <- randomEltI :: IO (Complex Integer)
   s <- randomEltI :: IO (Complex Integer)
-  x <- randomEltI' 2 :: IO (Quaternion (Complex Integer))
-  y <- randomEltI' 2 :: IO (Quaternion (Complex Integer))
+  x <- randomEltI' :: IO (Quaternion (Complex Integer))
+  y <- randomEltI' :: IO (Quaternion (Complex Integer))
   checkIsomorphism f x y
   checkModule x y r s
   checkDotCross x y
@@ -413,8 +416,8 @@ checkProperties5 = do
   let f = phi :: Octonion (Sedenion Integer) -> Nion Tag7 Integer
   r <- randomEltI :: IO (Sedenion Integer)
   s <- randomEltI :: IO (Sedenion Integer)
-  x <- randomEltI' 3 :: IO (Octonion (Sedenion Integer))
-  y <- randomEltI' 3 :: IO (Octonion (Sedenion Integer))
+  x <- randomEltI' :: IO (Octonion (Sedenion Integer))
+  y <- randomEltI' :: IO (Octonion (Sedenion Integer))
   checkIsomorphism f x y
   checkZeroAndOne x
   checkDistributive x y r s
@@ -425,8 +428,8 @@ checkProperties6 = do
   let f = phi :: Sedenion (Nion Tag5 Integer) -> Nion Tag9 Integer
   r <- randomEltI :: IO (Nion Tag5 Integer)
   s <- randomEltI :: IO (Nion Tag5 Integer)
-  x <- randomEltI' 4 :: IO (Sedenion (Nion Tag5 Integer))
-  y <- randomEltI' 4 :: IO (Sedenion (Nion Tag5 Integer))
+  x <- randomEltI' :: IO (Sedenion (Nion Tag5 Integer))
+  y <- randomEltI' :: IO (Sedenion (Nion Tag5 Integer))
   checkIsomorphism f x y
   checkZeroAndOne x
   checkDistributive x y r s

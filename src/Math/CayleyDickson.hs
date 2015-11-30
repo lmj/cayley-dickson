@@ -272,12 +272,10 @@ applyUsing' n sqrtMinus1 fr f z
   | otherwise = x .+ u *. y
   where (s, t, u) = polarUsing sqrtMinus1 z
         -- handle special cases for a little more accuracy
-        x C.:+ y | t == 0 = f s'
-                 | t == pi = f $ (-s) C.:+ 0 -- avoid -0.0
-                 | otherwise = f $ s' * exp (t' * u')
-                 where s' = s C.:+ 0
-                       t' = t C.:+ 0
-                       u' = 0 C.:+ 1
+        x C.:+ y | t == 0 = f $ c s 0
+                 | t == pi = f $ c (-s) 0
+                 | otherwise = f $ c s 0 * exp (c t 0 * c 0 1)
+                 where c = (C.:+)
 
 applyUsing :: (Tag n, Conjugable a, RealFloat a) =>
               Nion n a -> (a -> a) -> (C.Complex a -> C.Complex a) ->
@@ -441,8 +439,7 @@ instance (Conjugable a, Fractional a) => Fractional (Nion n a) where
   fromRational = fromScalar . fromRational
 
 -- | The first pure basis element is arbitrarily chosen as sqrt (-1).
-instance (Tag n, Conjugable a, RealFloat a) =>
-         Floating (Nion n a) where
+instance (Tag n, Conjugable a, RealFloat a) => Floating (Nion n a) where
   pi    = Scalar pi
   exp   = applyUsing basisElement1 exp exp
   log   = applyUsing basisElement1 log log
